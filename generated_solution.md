@@ -1,3 +1,5 @@
+### FILE: app/routes/appointments.py
+```python
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from app.graphql_client import run_query
@@ -123,3 +125,4 @@ def search_appointments(user: str = Query(None), time: str = Query(None)):
     data = run_query(query, variables)
     return data.get("appointments", [])
 
+```
