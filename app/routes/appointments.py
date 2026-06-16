@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from app.graphql_client import run_query
 
@@ -26,7 +26,7 @@ def get_appointments():
             }
         }
     """)
-    return data["appointments"]
+    return data.get("appointments", [])
 
 
 @router.get("/{appointment_id}")
@@ -44,9 +44,9 @@ def get_appointment(appointment_id: int):
         """,
         variables={"id": appointment_id},
     )
-    result = data["appointment"]
+    result = data.get("appointment")
     if result is None:
-        raise HTTPException(status_code=404, detail="Appointment not found")
+        raise HTTPException(status_code=404, detail={"error": "Appointment not found"})
     return result
 
 
@@ -65,7 +65,7 @@ def create_appointment(req: CreateAppointmentRequest):
         """,
         variables={"user": req.user, "time": req.time},
     )
-    return data["createAppointment"]
+    return data.get("createAppointment")
 
 
 @router.put("/{appointment_id}")
@@ -83,7 +83,7 @@ def update_appointment(appointment_id: int, req: UpdateAppointmentRequest):
         """,
         variables={"id": appointment_id, "time": req.time},
     )
-    return data["updateAppointment"]
+    return data.get("updateAppointment")
 
 
 @router.delete("/{appointment_id}")
@@ -96,4 +96,30 @@ def cancel_appointment(appointment_id: int):
         """,
         variables={"id": appointment_id},
     )
-    return {"cancelled": data["cancelAppointment"]}
+    return {"cancelled": data.get("cancelAppointment")}
+
+
+@router.get("/search")
+def search_appointments(user: str = Query(None), time: str = Query(None)):
+    if user is None and time is None:
+        raise HTTPException(status_code=400, detail={"error": "At least one query parameter is required"})
+
+    query = """
+        query SearchAppointments($user: String, $time: String) {
+            appointments(user: $user, time: $time) {
+                id
+                user
+                time
+                status
+            }
+        }
+    """
+    variables = {}
+    if user:
+        variables["user"] = user
+    if time:
+        variables["time"] = time
+
+    data = run_query(query, variables)
+    return data.get("appointments", [])
+
