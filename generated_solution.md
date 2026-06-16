@@ -1,3 +1,5 @@
+### FILE: routes/appointments.py
+```python
 from fastapi import APIRouter, status, HTTPException
 from app.models import (
     AppointmentUpdate, AppointmentBookingCreate, AppointmentSimpleCreate, 
@@ -102,3 +104,4 @@ def cancel_appointment_by_id(appointment_id: int):
     """
     return cancel_booking(appointment_id)
 
+```
