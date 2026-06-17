@@ -88,12 +88,17 @@ def update_appointment(appointment_id: int, req: UpdateAppointmentRequest):
 
 @router.delete("/{appointment_id}")
 def cancel_appointment(appointment_id: int):
-    data = run_query(
-        """
-        mutation CancelAppointment($id: Int!) {
-            cancelAppointment(id: $id)
-        }
-        """,
-        variables={"id": appointment_id},
-    )
-    return {"cancelled": data["cancelAppointment"]}
+    try:
+        data = run_query(
+            """
+            mutation CancelAppointment($id: Int!) {
+                cancelAppointment(id: $id)
+            }
+            """,
+            variables={"id": appointment_id},
+        )
+        if data["cancelAppointment"] is None:
+            raise HTTPException(status_code=404, detail="Appointment not found")
+        return {"message": "Appointment cancelled successfully"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
