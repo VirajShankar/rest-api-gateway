@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Path, Depends, HTTPException
 from pydantic import BaseModel
 from services.appointments import AppointmentService
-
+from main import get_appointment_service
 
 router = APIRouter()
 
@@ -13,7 +13,7 @@ class AppointmentDeleteResponse(BaseModel):
 
 @router.delete("/appointments/{id}", response_model=AppointmentDeleteResponse)
 async def delete_appointment(
-    id: int = Path(...), appointment_service: AppointmentService = Depends()
+    id: int = Path(...), appointment_service: AppointmentService = Depends(get_appointment_service)
 ):
     try:
         appointment_id = appointment_service.delete_appointment(id)
@@ -22,3 +22,4 @@ async def delete_appointment(
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+
