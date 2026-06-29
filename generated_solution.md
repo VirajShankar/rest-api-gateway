@@ -1,3 +1,41 @@
+### FILE: main.py
+```python
+from fastapi import FastAPI
+from routes.appointments import router
+from app.db_client import AppointmentDbClient
+from app.services.appointments import AppointmentService
+
+app = FastAPI()
+
+db_client = AppointmentDbClient()
+appointment_service = AppointmentService(db_client)
+
+
+def get_appointment_service() -> AppointmentService:
+    return appointment_service
+
+
+app.include_router(router)
+
+```
+
+### FILE: app/services/appointments.py
+```python
+from app import db_client
+from typing import Dict, Any
+
+
+class AppointmentService:
+    def __init__(self, db_client: db_client.AppointmentDbClient):
+        self.db_client = db_client
+
+    def get_appointment(self, id: int) -> Dict[str, Any]:
+        return self.db_client.get_appointment(id)
+
+```
+
+### FILE: routes/appointments.py
+```python
 from fastapi import APIRouter, Path, Depends, HTTPException
 from pydantic import BaseModel
 from app.services.appointments import AppointmentService
@@ -27,3 +65,5 @@ async def get_appointment(
         time=appointment["time"],
         status=appointment["status"],
     )
+
+```
