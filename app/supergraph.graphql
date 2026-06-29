@@ -1,0 +1,22 @@
+schema {
+  query: Query
+}
+
+type Query {
+  appointment(id: Int!): Appointment
+  appointmentRecord(id: Int!): AppointmentStorage
+}
+
+type Appointment {
+  id: Int!
+  user: String!
+  time: String!
+  status: String!
+}
+
+type AppointmentStorage {
+  id: Int!
+  user: String!
+  time: String!
+  status: String!
+}
